@@ -1,2 +1,2 @@
 # AudioApplicationTemplate
-My template for audio application using JUCE framework.
+My template for audio application using JUCE framework(Mac only).
