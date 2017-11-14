@@ -56,16 +56,22 @@ public:
     }
     
 private:
+    void openAudioFile();
+    
     dsp::Gain<float> outputVolume;
     Slider sl_outputVolume;
     TextButton btn_play;
     TextButton btn_stop;
     TextButton btn_open;
     TextButton btn_inputSelector[2];//0:AudioFile, 1:InputStream
+    bool isStreamingInput = false;
+    
+    AudioFormatManager formatManager;
+    std::unique_ptr<AudioFormatReaderSource> readerSource;
+    AudioTransportSource transportSource;
     
     //オーディオインターフェース,ノイズゲート設定の記録、呼び出し用
     ScopedPointer<ApplicationProperties> appProperties;
-    
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
 };

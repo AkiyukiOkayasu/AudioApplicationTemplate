@@ -4,8 +4,10 @@ MainContentComponent::MainContentComponent()
 {
     setSize (800, 450);
     if(JUCE_MAC) setMacMainMenu(this);
+    formatManager.registerBasicFormats();
+    transportSource.setLooping(true);
     
-    //出力ボリュームを調整するスライダーの設定
+    //GUI
     addAndMakeVisible(sl_outputVolume);
     sl_outputVolume.setRange(-72.0, 0.0, 0.1);
     sl_outputVolume.setTextValueSuffix("dB");
@@ -18,7 +20,7 @@ MainContentComponent::MainContentComponent()
         addAndMakeVisible(btn_inputSelector[i]);
         btn_inputSelector[i].setClickingTogglesState(true);
         btn_inputSelector[i].setRadioGroupId(34567);
-        btn_inputSelector[i].setColour (TextButton::buttonOnColourId, Colours::grey);
+        btn_inputSelector[i].setColour (TextButton::buttonOnColourId, Colours::limegreen);
         btn_inputSelector[i].addListener(this);
     }
     btn_inputSelector[0].setButtonText("Audio File");
@@ -27,17 +29,19 @@ MainContentComponent::MainContentComponent()
     
     addAndMakeVisible(btn_play);
     btn_play.setButtonText("Play");
+    btn_play.setColour(TextButton::buttonColourId, Colours::limegreen);
+    btn_play.setEnabled(false);
     btn_play.addListener(this);
     
     addAndMakeVisible(btn_stop);
     btn_stop.setButtonText("Stop");
+    btn_stop.setColour(TextButton::buttonColourId, Colours::darkgrey);
+    btn_stop.setEnabled(false);
     btn_stop.addListener(this);
     
     addAndMakeVisible(btn_open);
     btn_open.setButtonText("Open");
     btn_open.addListener(this);
-    
-    formatManager.registerBasicFormats();
     
     //保存したパラメータをXMLファイルから呼び出し
     PropertiesFile::Options options;
@@ -66,10 +70,23 @@ void MainContentComponent::prepareToPlay (int samplesPerBlockExpected, double sa
     outputVolume.reset();
     outputVolume.setRampDurationSeconds(0.05);//ボリュームが変更時は50msかけてスムージングをかける
     outputVolume.setGainDecibels(sl_outputVolume.getValue());
+    
+    transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
 void MainContentComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill)
 {
+    if  (isStreamingInput)
+    {
+    }
+    else
+    {
+        bufferToFill.clearActiveBufferRegion();
+        if (readerSource != nullptr)
+        {
+            transportSource.getNextAudioBlock(bufferToFill);
+        }
+    }
     dsp::AudioBlock<float> block(*bufferToFill.buffer);
     dsp::ProcessContextReplacing<float> context(block);
     outputVolume.process(context);
@@ -122,19 +139,40 @@ void MainContentComponent::buttonClicked (Button* button)
     }
     else if(button == &btn_open)
     {
+        if (transportSource.isPlaying()) transportSource.stop();
         openAudioFile();
     }
     else if(button == &btn_play)
     {
+        if(!transportSource.isPlaying()) transportSource.start();
     }
     else if(button == &btn_stop)
     {
-    }
-    else
-    {
-        
+        if (transportSource.isPlaying()) transportSource.stop();
     }
 }
+
+void MainContentComponent::openAudioFile()
+{
+    FileChooser chooser("Select audio file to play",
+                        File::nonexistent, "*.wav;*.wave;*.aif;*.aiff");
+    
+    if (chooser.browseForFileToOpen())
+    {
+        File file(chooser.getResult());
+        ScopedPointer<AudioFormatReader> reader = formatManager.createReaderFor(file);
+        
+        if (reader != nullptr)
+        {
+            if (readerSource != nullptr) readerSource.release();
+            readerSource = std::make_unique<AudioFormatReaderSource>(reader, true);
+            readerSource->setLooping(true);
+            transportSource.setSource(readerSource.get(), 0, nullptr, reader->sampleRate);
+            btn_play.setEnabled(true);
+            btn_stop.setEnabled(true);
+        }
+        reader.release();
+    }
     
 }
 
