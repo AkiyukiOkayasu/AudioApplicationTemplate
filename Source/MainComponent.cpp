@@ -3,7 +3,7 @@
 MainContentComponent::MainContentComponent()
 {
     setSize (800, 450);
-    setMacMainMenu(this);
+    if(JUCE_MAC) setMacMainMenu(this);
     
     //出力ボリュームを調整するスライダーの設定
     addAndMakeVisible(sl_outputVolume);
@@ -53,7 +53,7 @@ MainContentComponent::MainContentComponent()
 
 MainContentComponent::~MainContentComponent()
 {
-    setMacMainMenu(nullptr);
+    if (JUCE_MAC) setMacMainMenu(nullptr);
     shutdownAudio();
 }
 
