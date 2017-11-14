@@ -57,7 +57,11 @@ public:
     
 private:
     dsp::Gain<float> outputVolume;
-    Slider slider_outputVolume;
+    Slider sl_outputVolume;
+    TextButton btn_play;
+    TextButton btn_stop;
+    TextButton btn_open;
+    TextButton btn_inputSelector[2];//0:AudioFile, 1:InputStream
     
     //オーディオインターフェース,ノイズゲート設定の記録、呼び出し用
     ScopedPointer<ApplicationProperties> appProperties;

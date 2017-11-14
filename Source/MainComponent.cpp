@@ -89,6 +89,17 @@ void MainContentComponent::paint (Graphics& g)
 void MainContentComponent::resized()
 {
     auto r = getLocalBounds();
+    auto inputSelectorBounds = r.removeFromTop(40);
+    btn_inputSelector[0].setBounds(inputSelectorBounds.removeFromLeft(inputSelectorBounds.getWidth() / 2));
+    btn_inputSelector[1].setBounds(inputSelectorBounds);
+    auto transportBounds = r.removeFromTop(40);
+    const int buttonWidth = transportBounds.getWidth() / 3;
+    btn_open.setBounds(transportBounds.removeFromLeft(buttonWidth));
+    btn_play.setBounds(transportBounds.removeFromLeft(buttonWidth));
+    btn_stop.setBounds(transportBounds);
+    
+    auto sliderBounds = r.removeFromBottom(60);
+    sl_outputVolume.setBounds(sliderBounds);
 }
 
 //==============================================================================
@@ -99,6 +110,31 @@ void MainContentComponent::sliderValueChanged (Slider* slider)
 
 void MainContentComponent::buttonClicked (Button* button)
 {
+    if (button == &btn_inputSelector[0])
+    {
+        //Audio file
+        isStreamingInput = false;
+    }
+    else if(button == &btn_inputSelector[1])
+    {
+        //Input stream
+        isStreamingInput = true;
+    }
+    else if(button == &btn_open)
+    {
+        openAudioFile();
+    }
+    else if(button == &btn_play)
+    {
+    }
+    else if(button == &btn_stop)
+    {
+    }
+    else
+    {
+        
+    }
+}
     
 }
 
