@@ -6,13 +6,38 @@ MainContentComponent::MainContentComponent()
     setMacMainMenu(this);
     
     //出力ボリュームを調整するスライダーの設定
-    addAndMakeVisible(slider_outputVolume);
-    slider_outputVolume.setRange(-72.0, 0.0, 0.1);
-    slider_outputVolume.setTextValueSuffix("dB");
-    slider_outputVolume.setSkewFactor(1.5);
-    slider_outputVolume.setValue(-12.0);
-    slider_outputVolume.addListener(this);
+    addAndMakeVisible(sl_outputVolume);
+    sl_outputVolume.setRange(-72.0, 0.0, 0.1);
+    sl_outputVolume.setTextValueSuffix("dB");
+    sl_outputVolume.setSkewFactor(1.5);
+    sl_outputVolume.setValue(-12.0);
+    sl_outputVolume.addListener(this);
     
+    for(int i = 0; i < 2; ++i)
+    {
+        addAndMakeVisible(btn_inputSelector[i]);
+        btn_inputSelector[i].setClickingTogglesState(true);
+        btn_inputSelector[i].setRadioGroupId(34567);
+        btn_inputSelector[i].setColour (TextButton::buttonOnColourId, Colours::grey);
+        btn_inputSelector[i].addListener(this);
+    }
+    btn_inputSelector[0].setButtonText("Audio File");
+    btn_inputSelector[1].setButtonText("Input Stream");
+    btn_inputSelector[0].setToggleState(true, NotificationType::dontSendNotification);
+    
+    addAndMakeVisible(btn_play);
+    btn_play.setButtonText("Play");
+    btn_play.addListener(this);
+    
+    addAndMakeVisible(btn_stop);
+    btn_stop.setButtonText("Stop");
+    btn_stop.addListener(this);
+    
+    addAndMakeVisible(btn_open);
+    btn_open.setButtonText("Open");
+    btn_open.addListener(this);
+    
+    formatManager.registerBasicFormats();
     
     //保存したパラメータをXMLファイルから呼び出し
     PropertiesFile::Options options;
@@ -40,7 +65,7 @@ void MainContentComponent::prepareToPlay (int samplesPerBlockExpected, double sa
     outputVolume.prepare(spec);
     outputVolume.reset();
     outputVolume.setRampDurationSeconds(0.05);//ボリュームが変更時は50msかけてスムージングをかける
-    outputVolume.setGainDecibels(slider_outputVolume.getValue());
+    outputVolume.setGainDecibels(sl_outputVolume.getValue());
 }
 
 void MainContentComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill)
@@ -64,13 +89,12 @@ void MainContentComponent::paint (Graphics& g)
 void MainContentComponent::resized()
 {
     auto r = getLocalBounds();
-    slider_outputVolume.setBounds(r);
 }
 
 //==============================================================================
 void MainContentComponent::sliderValueChanged (Slider* slider)
 {
-    if (slider == &slider_outputVolume) outputVolume.setGainDecibels(slider->getValue());
+    if (slider == &sl_outputVolume) outputVolume.setGainDecibels(slider->getValue());
 }
 
 void MainContentComponent::buttonClicked (Button* button)
