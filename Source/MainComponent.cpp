@@ -154,7 +154,7 @@ void MainContentComponent::buttonClicked (Button* button)
 
 void MainContentComponent::openAudioFile()
 {
-    FileChooser chooser("Select audio file to play", File::nonexistent, formatManager.getWildcardForAllFormats());
+    FileChooser chooser("Select audio file to play", File(), formatManager.getWildcardForAllFormats());
     
     if (chooser.browseForFileToOpen())
     {

@@ -32,3 +32,5 @@
 *.app
 
 Builds/MacOSX/RecentFilesMenuTemplate\.nib
+
+Builds/MacOSX/AudioApplicationTemplate\.xcodeproj/xcuserdata/
